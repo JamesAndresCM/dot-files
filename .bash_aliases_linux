@@ -1,0 +1,198 @@
+alias rm="rm --preserve-root"
+alias ls='ls --group-directories-first --color'
+alias dir='dir --color=auto'
+alias vdir='vdir --color=auto'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+alias ps3joy='sudo xboxdrv --detach-kernel-driver'
+alias borrar_temporales='sudo rm -rf ~/.local/share/Trash/{*,.*} &> /dev/null ; sudo rm -rf /tmp/{*,.*} &> /dev/null'
+alias download_hd_youtube='youtube-dl -f bestvideo+bestaudio'
+alias infosystem='sudo inxi -c 25 -SGCm && echo -e "\e[1;31mStartup:   $( systemd-analyze)"'
+alias tamaño='du -h --max-depth=1 2> /dev/null |sort -rh | head -n 10'
+alias search='locate -eil 10'
+alias kvmON='sudo systemctl start libvirtd virtlogd.socket'
+alias kvmOFF='sudo systemctl stop libvirtd virtlogd.socket'
+alias golismero='python2.7 /opt/golismero/golismero.py'
+alias wireshark='sudo /usr/bin/wireshark-gtk'
+alias whereismyip='dig +short myip.opendns.com @resolver1.opendns.com'
+alias more_cpu='ps aux --width 30 --sort -%cpu | sed '/0.0/d' | head -n10'
+alias more_ram='ps aux --width 30 --sort -rss | sed '/0.0/d' | head -n10'
+alias patch_chrome='sudo sed -i 's/google-chrome-stable/google-chrome/g' /usr/share/applications/google-chrome.desktop; sudo rm  /usr/bin/google-chrome-stable; psd c; psd p'
+alias syslog="sudo tail -F /var/log/syslog|ccze -A"
+alias nst="sudo netstat --numeric-ports --numeric-hosts -atepluon | ccze -A"
+alias cache_pass_git='git config --global credential.helper 'cache --timeout=1800''
+alias true_wc='echo $(($(ls -l $1 | wc -l)-1))'
+alias ver_tiempo='curl -s wttr.in/Curico | head -n 7'
+alias ram_optimize='sudo sync && sudo sysctl -w vm.drop_caches=3'
+alias irc='screen irssi'
+alias service_runing='systemctl --no-page --no-legend --plain -t service --state=running'
+alias web_tty='ttyd bash'
+
+function rhcsa-server() {
+    die() {
+        echo >&2 "$@"
+     }
+
+   if [[ $# == 2 ]]; then 
+        vm="$1"
+        ssh_conn="root@$2"
+        status=$(vboxmanage list runningvms | grep -E '(^|\s)"'$vm'"($|\s)')
+        if [[ $? == "0" ]]; then
+            ssh $ssh_conn 
+        else 
+            VBoxManage startvm $vm --type headless; echo "iniciando..." && sleep 40; ssh $ssh_conn
+        fi
+    else
+        die "saliendo..."
+    fi
+}
+
+alias centos-rhcsa-server='rhcsa-server centos-rhcsa 192.168.1.90'
+alias centos-rhcsa-cliente='rhcsa-server centos-rhcsa-cliente 192.168.1.91'
+man() {
+    env \
+        LESS_TERMCAP_mb=$(printf "\e[1;31m") \
+        LESS_TERMCAP_md=$(printf "\e[1;31m") \
+        LESS_TERMCAP_me=$(printf "\e[0m") \
+        LESS_TERMCAP_se=$(printf "\e[0m") \
+        LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
+        LESS_TERMCAP_ue=$(printf "\e[0m") \
+        LESS_TERMCAP_us=$(printf "\e[1;32m") \
+            man "$@"
+}
+
+red='\[\033[0;31m\]'
+lred='\[\033[1;31m\]'
+green='\[\033[0;32m\]'
+lgreen='\[\033[1;32m\]'
+orange='\[\033[0;33m\]'
+yellow='\[\033[1;33m\]'
+blue='\[\033[0;34m\]'
+lblue='\[\033[1;34m\]'
+mangenta='\[\033[1;35m\]'
+white='\[\033[1;37m\]'
+
+LS_OPTS="--color=auto -h -p -F"
+
+export LS_OPTS PATH
+
+alias ls='ls $LS_OPTS'
+
+
+start() { sudo systemctl start $1; }
+stop() { sudo systemctl stop $1; }
+restart() { sudo systemctl restart $1; }
+status() { systemctl status $1; }
+
+anon(){ 
+       sudo systemctl start tor && proxychains $1;
+}	
+enabled() { sudo systemctl enable $1; }
+disabled() { sudo systemctl disable $1; }
+
+function ver_proceso {
+
+die() {
+	echo >&2 "$@"
+	
+}
+
+if [[ "$#" -eq 1 && $1 != '^\([0-9a-ZA-Z])$' ]]; then
+
+ps aux --sort=-rss | awk '{print "** USER: "$1" **", "  ** PID: "$2" **", "  ** %CPU: "$3" **", "  ** %MEM: "$4" **", "  ** COMMAND: "$11" **"}' | grep -i $1 2> /dev/null
+	else 
+		die "ingrese un argumento no $#, Uso : ver_proceso nautilus"
+ fi
+}
+
+
+function count_word {
+	if [[ -f $1 && "$#" -eq 1 ]]; then  
+		printf "count words in text\n"; sed -e 's/[^[:alnum:]]/ /g' $1 | tr '\n' " " |  tr -s " " | tr " " '\n'| sort | uniq -c| nl 
+	else
+		printf "error..\n";
+	fi
+}
+function extract {
+     if [ -f $1 ] ; then
+         case $1 in
+	     *.tar.xz)    tar xvf $1		;;
+             *.tar.bz2)   tar xjf $1        ;;
+             *.tar.gz)    tar xzf $1     ;;
+             *.bz2)       bunzip2 $1       ;;
+             *.rar)       unrar x $1     ;;
+             *.gz)        gunzip $1     ;;
+             *.tar)       tar xf $1        ;;
+             *.tbz2)      tar xjf $1      ;;
+             *.tgz)       tar xzf $1       ;;
+             *.zip)       unzip $1     ;;
+             *.Z)         uncompress $1  ;;
+             *.7z)        7z x $1    ;;
+             *)           echo "'$1' No se puede extraer con extract()" ;;
+         esac
+     else
+         echo "'$1' No es un fichero valido"
+     fi
+}
+ 
+}
+
+infoip() { 
+
+	die(){
+		echo >&2 "$@";
+	}
+	if grep -P "(([1-9]\d{0,2})\.){3}(?2)" <<< "$1"; then
+		curl ipinfo.io/"$1" 2> /dev/null | grep -v -e "[{}]" -e "ip" 
+	else
+		die "ingrese una ip valida! no $1 ** uso : infoip 181.XXX.XXX.XXX **"
+
+	fi
+	
+}
+
+function wpscan {
+
+die() {
+ echo >&2 "$@"
+}
+ if [[ "$#" -eq 1 ]]; then
+      /usr/bin/wpscan -u $1 -e u vp 2> /dev/null
+	else
+	   die "ingrese un argumento no $# uso : wpscan www.example.com"
+ fi
+}
+
+
+function wpscan_brute_force {
+die() {
+echo >&2 "$@"
+}
+
+wordlist="~/Downloads/wordlist/rockyou.txt"
+	
+if [[ "$#" -eq 2 ]]; then
+	/usr/bin/wpscan -u $1 -w $wordlist --username $2 2> /dev/null
+	       else
+	          die "ingrese solo 2 argumentos no $# uso : wpscan www.example.com nombre_user"
+	 fi
+ }
+
+function domain_ip() {
+	ip=$(resolveip -s $1)
+	echo $ip | xsel -b
+	echo $ip
+}
+
+function remove_docker_none(){
+	none=$(docker images -a | grep "<none>" | awk '{print $3}')
+	[[ -z $none ]] && printf "no hay contenedores <none>\n" || docker rmi $none
+
+}
+
+function binary() { echo $1 | perl -lpe '$_=join " ", unpack"(B8)*"'; }
+
+function resolve_domain(){
+		dig ns +short $1;
+}
