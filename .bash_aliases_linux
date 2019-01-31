@@ -136,8 +136,6 @@ function extract {
      fi
 }
  
-}
-
 infoip() { 
 
 	die(){
