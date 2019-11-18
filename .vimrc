@@ -31,6 +31,7 @@ au BufWinEnter * set number
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
+set autochdir
 " alternatively, pass a path where Vundle should install plugins
 "call vundle#begin('~/some/path/here')
 
@@ -62,21 +63,15 @@ Plugin 'tpope/vim-projectionist'
 Plugin 'jlanzarotta/bufexplorer'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'dracula/vim'
-Plugin 'scrooloose/syntastic'
-Plugin 'ngmy/vim-rubocop'
+" Plugin 'scrooloose/syntastic'
+" Plugin 'ngmy/vim-rubocop'
+Plugin 'w0rp/ale'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
 filetype plugin on
-
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-let g:syntastic_ruby_checkers = ['rubocop']
 "
 " Brief help
 " :PluginList          - list configured plugins
@@ -84,5 +79,21 @@ let g:syntastic_ruby_checkers = ['rubocop']
 " :PluginSearch(!) foo - search (or refresh cache first) for foo
 " :PluginClean(!)      - confirm (or auto-approve) removal of unused plugins
 
-" see :h vundle for more details or wiki for FAQ
-" Put your non-Plugin stuff after this line
+" Replace W with w, on save :Wq -> :wq
+fun! SetupCommandAlias(from, to)
+  exec 'cnoreabbrev <expr> '.a:from
+        \ .' ((getcmdtype() is# ":" && getcmdline() is# "'.a:from.'")'
+        \ .'? ("'.a:to.'") : ("'.a:from.'"))'
+endfun
+call SetupCommandAlias("W","w")
+call SetupCommandAlias("Q","q")
+call SetupCommandAlias("Wq","wq")
+call SetupCommandAlias("WQ","wq")
+
+" ALE configs
+let g:ale_linters = { 'ruby': ['rubocop'] , 'go': ['gometalinter', 'gofmt'], 'json': ['jsonlint']}
+let g:ale_linters_explicit = 1
+let g:airline#extensions#ale#enabled = 1
+let g:ale_sign_column_always = 1
+" Disable ALE auto highlights
+let g:ale_set_highlights = 1
